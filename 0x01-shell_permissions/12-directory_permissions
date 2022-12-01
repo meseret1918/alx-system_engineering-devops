@@ -1,0 +1,2 @@
+#!/bin/bash
+kmdir -m 751 my_dir
