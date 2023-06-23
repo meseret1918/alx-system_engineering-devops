@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# updates local configuration file for SSH client so that you can connect to a server without typing a password
+Host school
+    Hostname 100.26.233.5
+    User ubuntu
+    IdentityFile ~/.ssh/school
+
+    PasswordAuthentication no
