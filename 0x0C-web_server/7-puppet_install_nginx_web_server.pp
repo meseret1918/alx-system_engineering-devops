@@ -1,25 +1,7 @@
-# File:   7-puppet_install_nginx_web_server.pp
-# Author: Alex Orland Arévalo Tribaldos
-# email:  <3915@holbertonschool.com>
+#!/usr/bin/env bash
+# Puppet manifest that installs and configures an Nginx server with a 301 redirect
 
-# Using Puppet| Install Nginx server, setup and configuration
-
-package { 'nginx':
-  ensure => 'installed'
-}
-
-file { '/var/www/html/index.html':
-  content => 'Hello World',
-}
-
-file_line { 'redirection-301':
-  ensure => 'present',
-  path   => '/etc/nginx/sites-available/default',
-  after  => 'listen 80 default_server;',
-  line   => 'rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;',
-}
-
-service { 'nginx':
-  ensure  => running,
-  require => Package['nginx'],
+exec {'install':
+  provider => shell,
+  command  => 'sudo apt-get -y update ; sudo apt-get -y install nginx ; echo "Hello World!" | sudo tee /var/www/html/index.nginx-debian.html ; sudo sed -i "s/server_name _;/server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/bekiyeromm permanent;/" /etc/nginx/sites-available/default ; sudo service nginx start',
 }
