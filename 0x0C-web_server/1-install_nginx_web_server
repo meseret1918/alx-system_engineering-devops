@@ -1,14 +1,38 @@
 #!/usr/bin/env bash
-# This script installs a nginx web server
+# Install ngnix into my server
+# Nginx should be listening on port 80
+# curl localhost should result "Hello World!"
 
-sudo apt-get update
-sudo apt-get install nginx
-sudo ufw 'Nginx HTTP'
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw --force enable
-sudo ufw status
-systemctl status nginx
-echo "Hello World!" | sudo tee /var/www/html/index.html
-sduo nginx -t
-sudo service nginx reload
+
+# Update apt and Install nginx
+sudo apt -y update
+sudo apt -y install nginx
+
+# Remove and replace /var/www to store static content
+
+rm -rf school
+mkdir school
+touch school/index.html
+echo "Hello World!" > school/index.html
+sudo rm -rf /var/www/school
+sudo mv school /var/www/
+
+# Change the default configuration of nginx
+touch default
+printf %s "server {
+       listen 80;
+       listen [::]:80;
+
+       root /var/www/school;
+       index index.html;
+}
+" > default
+
+# Remove and replace existing configurations
+sudo rm -rf /etc/nginx/sites-available/default
+sudo rm -rf /etc/nginx/sites-enabled/default
+sudo mv default /etc/nginx/sites-available/
+sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# Restart nginx
+sudo service nginx restart
