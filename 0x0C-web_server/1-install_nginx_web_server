@@ -1,31 +1,9 @@
 #!/usr/bin/env bash
-# Configures a new ubuntu machine by installing
-# Nginx where it should be listening on port 80
-# Serve a page that would return a Hello World string
+# Install nginx on web server; Nginx should be listening on port 80
 
-# Install nginx
-sudo apt -y update
-sudo apt install -y nginx
-
-# Configuration
-mkdir /etc/nginx/html
-
-# Configure nginx to listen on port 80
-ufw allow 'Nginx HTTP'
-
-#Creating Sample Page
-echo "Hello World!" > /etc/nginx/html/index.html
-
-# Create Server Block
-echo "server {
-        listen 80 default_server;
- 	listen [::]:80 default_server;
-
-	root /etc/nginx/html;
-	index index.html index.htm index.nginx-debian.html;
-
-	server_name _;							
-}" > /etc/nginx/sites-available/default
-
-# start nginx
-service nginx start
+sudo apt-get -y update
+sudo apt-get -y install nginx
+sudo ufw allow "Nginx HTTP"
+sudo chown -R $USER:$USER /var/www/html/index.nginx-debian.html
+sudo echo "Hello World!" > /var/www/html/index.nginx-debian.html
+sudo service nginx restart
