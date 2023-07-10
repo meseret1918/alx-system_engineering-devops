@@ -11,8 +11,8 @@ sudo echo "
    backend back_server
         balance      roundrobin
         mode         http
-        server 128037-web-01 52.23.177.118:80 check
-        server 128037-web-02 54.160.69.6:80 check
+        server 209879-web-01 52.201.222.41 check
+        server 209879-web-02 174.129.54.185 check
 " >> /etc/haproxy/haproxy.cfg
 sudo haproxy -f /etc/haproxy/haproxy.cfg -c
 sudo service haproxy restart
