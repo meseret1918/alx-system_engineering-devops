@@ -1,39 +1,15 @@
 #!/usr/bin/env bash
-#Configure your Nginx server so that /redirect_me is redirecting to another page.
+#configures a new Ubuntu machine nginx
 
-# Update apt and Install nginx
-sudo apt -y update
-sudo apt -y install nginx
+sudo apt-get update
+sudo apt-get install -y nginx
 
-# Remove and replace /var/www to store static content
-rm -rf school
-mkdir school
-touch school/index.html
-echo "Hello World!" > school/index.html
-sudo rm -rf /var/www/school
-sudo mv school /var/www/
+sudo ufw allow 'Nginx HTTP'
 
-# Change the default configuration of nginx
-# Add redirection for localhost/redirect_me
-touch default
-printf %s "server {
-        listen 80;
-        listen [::]:80;
+echo "Hello World!" | sudo tee /var/www/html/index.html
 
-        root /var/www/school;
-        index index.html;
+string_for_replacement="server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/meseret1918 permanent;"
 
-        location /redirect_me {
-            return 301 https://youtube.com;
-        }
-}
-" > default
+sudo sed -i "s/server_name _;/$string_for_replacement/" /etc/nginx/sites-enabled/default
 
-# Remove and replace existing configurations
-sudo rm -rf /etc/nginx/sites-available/default
-sudo rm -rf /etc/nginx/sites-enabled/default
-sudo mv default /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
-# Restart nginx
-sudo service nginx restart
+sudo service nginx start
