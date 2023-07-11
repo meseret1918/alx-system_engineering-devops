@@ -1,18 +1,50 @@
 #!/usr/bin/env bash
-# Install and configure HAproxy on your lb-01 server so that it send traffic to web-01 and web-02
-sudo apt-get -y update
+# Installs HAProxy version 1.8 with the following configurations:
+#+    Enables management via the init script.
+#+    Distributes requests using a round-robin algorithm.
+
+sudo apt-get update
 sudo apt-get install -y haproxy
-sudo echo "ENABLED=1" >> /etc/default/haproxy
-# Listen to web1 and web2 servers
-sudo echo "
-   frontend www
-        bind *:80
-        default_backend back_server
-   backend back_server
-        balance      roundrobin
-        mode         http
-        server 209879-web-01 52.201.222.41 check
-        server 209879-web-02 174.129.54.185 check
+
+echo "ENABLED=1" >> /etc/default/haproxy
+mv /etc/haproxy/haproxy.cfg{,.orginal}
+touch /etc/haproxy/haproxy.cfg
+
+printf %s " global
+        log 127.0.0.1   local0 notice
+        maxconn   2000 # Total Max Connections.
+        user    haproxy
+        group   haproxy
+
+defaults
+        log     global
+        daemon  http
+        option  httplog
+        option  dontlognull
+        retries 3
+        option redispatch
+        timeout connect 5000
+        timeout client 30000
+        timeout server 30000
+
+        errorfile 400 /etc/haproxy/errors/400.http
+        errorfile 403 /etc/haproxy/errors/403.http
+        errorfile 408 /etc/haproxy/errors/408.http
+        errorfile 500 /etc/haproxy/errors/500.http
+        errorfile 502 /etc/haproxy/errors/502.http
+        errorfile 503 /etc/haproxy/errors/503.http
+        errorfile 504 /etc/haproxy/errors/504.http
+
+# frontend HTTP-in
+        timeout client 30000
+        bind 0:80
+        default_backend servers
+
+backend servers
+        timeout connect 3000
+        timeout server 30000
+        balance roundrobin  # Load Balancing algorithm
+        server 209879-web-01 52.201.222.41:80 check
+        server 209879-web-02 174.129.54.185:80 check
 " >> /etc/haproxy/haproxy.cfg
-sudo haproxy -f /etc/haproxy/haproxy.cfg -c
 sudo service haproxy restart
