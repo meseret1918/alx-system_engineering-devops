@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# change nginx server to listen on port 80 and restart
-
-sed -i "s/8080/80/g" /etc/nginx/sites-enabled/default
+# Fix for the second web stack debugging_1 server
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 service nginx restart
+rm /run/nginx.pid

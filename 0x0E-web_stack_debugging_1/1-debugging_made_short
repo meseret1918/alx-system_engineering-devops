@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-# change nginx to listen on port 80 and kill it
-sed -i "s/8080/80/g" /etc/nginx/sites-enabled/default
-pkill -f --signal 1 "/usr/sbin/nginx"
+# Fix for the second web stack debugging_1 server
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+service nginx restart
+sudo sed -i 's,pid /run/nginx.pid,pid /run/nginx.bak,' /etc/nginx/nginx.conf
