@@ -1,58 +1,57 @@
 #!/usr/bin/env bash
-# Installs HAProxy version 1.8 with the following configurations:
-#+    Enables management via the init script.
-#+    Distributes requests using a round-robin algorithm.
+# install load balancer
 
-sudo apt-get update
-sudo apt-get install -y haproxy
 
-echo "ENABLED=1" >> /etc/default/haproxy
-mv /etc/haproxy/haproxy.cfg{,.orginal}
-touch /etc/haproxy/haproxy.cfg
+echo -e "Updating and doing some minor checks...\n"
 
-printf %s " global
-        log 127.0.0.1   local0 notice
-        maxconn   2000 # Total Max Connections.
-        user    haproxy
-        group   haproxy
+function install() {
+	command -v "$1" &> /dev/null
 
+	#shellcheck disable=SC2181
+	if [ $? -ne 0 ]; then
+		echo -e "	Installing: $1\n"
+		sudo apt-get update -y -qq && \
+			sudo apt-get install -y "$1" -qq
+		echo -e "\n"
+	else
+		echo -e "	${1} is already installed.\n"
+	fi
+}
+
+install haproxy #install haproxy
+
+echo -e "\nSetting up some minor stuff.\n"
+
+# backup default server config file
+sudo cp /etc/haproxy/haproxy.cfg haproxy_default.backup
+
+server_config=\
+"
 defaults
-        log     global
-        daemon  http
-        option  httplog
-        option  dontlognull
-        retries 3
-        option redispatch
-        timeout connect 5000
-        timeout client 30000
-        timeout server 30000
+  mode http
+  timeout client 15s
+  timeout connect 10s
+  timeout server 15s
+  timeout http-request 10s
 
-        errorfile 400 /etc/haproxy/errors/400.http
-        errorfile 403 /etc/haproxy/errors/403.http
-        errorfile 408 /etc/haproxy/errors/408.http
-        errorfile 500 /etc/haproxy/errors/500.http
-        errorfile 502 /etc/haproxy/errors/502.http
-        errorfile 503 /etc/haproxy/errors/503.http
-        errorfile 504 /etc/haproxy/errors/504.http
+frontend myfrontend
+    bind *:80
+    default_backend myservers
 
-# frontend HTTP-in
-        timeout client 30000
-        bind 0:80
-        default_backend servers
+backend myservers
+    balance roundrobin
+    server 209879-web-01 52.201.222.41:80 check
+    server 209879-web-02 174.129.54.185:80 check
+"
 
-backend servers
-        timeout connect 3000
-        timeout server 30000
-        balance roundrobin  # Load Balancing algorithm
-        server 209879-web-01 52.201.222.41:80 check
-        server 209879-web-02 174.129.54.185:80 check
-	
-listen stats
-    bind :8800
-    stats enable
-    stats uri /
-    stats hide-version
-    stats auth rosehosting:m0d1fyth15
-    default_backend apache_webservers
-" >> /etc/haproxy/haproxy.cfg
-sudo service haproxy restart
+# shellcheck disable=SC2154
+echo "$server_config" | sudo dd status=none of=/etc/haproxy/haproxy.cfg
+
+# enable haproxy to be started by init script
+echo "ENABLED=1" | sudo dd status=none of=/etc/default/haproxy
+
+if [ "$(pgrep -c haproxy)" -le 0 ]; then
+	sudo service haproxy start
+else
+	sudo service haproxy restart
+fi
