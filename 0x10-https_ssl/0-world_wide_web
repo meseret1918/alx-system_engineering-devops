@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
-# configure domain zone and write Bash script that will display information about subdomains.
-# usage ./0-world_wide_web <domain> <subdomain>
-subdomains=(www lb-01 web-01 web-02)
+# Configure my domain zone:
+# www --> 209879-lb-01 52.3.255.5
+# web-01 --> 209879-web-01 52.201.222.41
+# web-02 --> 209879-web-02 174.129.54.185
 
-if [ "$2" ]
+# -- To be evaluated --
+domain_information () {
+line=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | tr '\n' ' ')
+# extract relevant information
+echo "$2 $line" | awk '{print "The subdomain " $1 " is a " $2 " record and points to " $3}'
+}
+
+if [ "$#" == 1 ]
 then
-    echo -n "The subdomain $2 "
-    dig "$2.$1" | grep -A1 'ANSWER SECTION:' | grep -v 'ANSWER SECTION:' | awk '{print "is a", $4, "record and points to", $5}'
-else
-    for i in "${subdomains[@]}"
-    do
-	echo -n "The subdomain $i "
-	dig "$i.$1" | grep -A1 'ANSWER SECTION:' | grep -v 'ANSWER SECTION:' | awk '{print "is a", $4, "record and points to", $5}'
-    done
+	domain_information "$1" "www"
+	domain_information "$1" "lb-01"
+	domain_information "$1" "web-01"
+	domain_information "$1" "web-02"
+elif [ "$#" == 2 ]
+then
+	domain_information "$1" "$2"
 fi
