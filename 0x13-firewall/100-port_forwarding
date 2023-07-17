@@ -50,3 +50,7 @@ COMMIT
 -A ufw-before-input -p udp --sport 67 --dport 68 -j ACCEPT
 
 #
+<<<<<<< HEAD
+=======
+   
+>>>>>>> b6c391a15f189beda34ed88263157472b7e775d3
