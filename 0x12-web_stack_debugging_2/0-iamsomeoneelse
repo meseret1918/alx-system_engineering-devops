@@ -1,3 +1,14 @@
-#!/usr/bin/env bash
-# Bash script that accepts one argument the script should run the whoami
-sudo -u "$1" whoami
+#!/bin/bash
+
+# Check if an argument is provided
+if [ $# -eq 0 ]; then
+  echo "Please provide a username as an argument."
+  exit 1
+fi
+
+# Store the username from the argument
+username=$1
+
+# Run the whoami command under the specified user
+sudo -u "$username" whoami
+
