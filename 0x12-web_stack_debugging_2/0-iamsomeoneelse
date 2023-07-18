@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check if an argument is provided
 if [ $# -eq 0 ]; then
@@ -6,9 +6,6 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-# Store the username from the argument
-username=$1
-
 # Run the whoami command under the specified user
-sudo -u "$username" whoami
+sudo -u "$1" whoami
 
