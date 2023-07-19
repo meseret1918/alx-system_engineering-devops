@@ -1,3 +1,28 @@
 #!/usr/bin/env bash
-# Run software as another user
-sudo -u "$username" whoami
+
+username=$1
+
+# Check if the username parameter is provided
+if [ -z "$username" ]; then
+  echo "Please provide a username as a parameter."
+  exit 1
+fi
+
+# Check if the user exists
+if ! id -u "$username" >/dev/null 2>&1; then
+  echo "User '$username' does not exist."
+  exit 1
+fi
+
+# Get the user's home directory
+home_dir=$(getent passwd "$username" | cut -d: -f6)
+
+# Check if the user has a home directory
+if [ -z "$home_dir" ]; then
+  echo "User '$username' does not have a home directory."
+  exit 1
+fi
+
+# Run the command as the specified user
+sudo -u "$username" -H whoami
+
