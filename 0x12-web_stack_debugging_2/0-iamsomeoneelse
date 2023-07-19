@@ -7,5 +7,5 @@ if [ $# -eq 0 ]; then
 fi
 
 # Run the whoami command under the specified user
-sudo -u "$1" whoami
+sudo -u "$home" whoami
 
