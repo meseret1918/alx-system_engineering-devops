@@ -4,7 +4,7 @@ frontend http_front
     redirect scheme https code 301 if !{ ssl_fc }
 
 frontend https_front
-    bind *:443 ssl crt /etc/ssl/certs/mycert.pem
+    bind *:443 ssl crt /etc/letsencrypt/live/www.sekela.tech/fullchain.pem
     mode http
     option httplog
     option forwardfor
