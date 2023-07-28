@@ -1,46 +1,18 @@
-#!/bin/bash
-
-# Update the system
-sudo apt update
-sudo apt upgrade -y
-
-# Install HAproxy
-sudo apt install -y haproxy
-
-# Configure HAproxy
-sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
-sudo bash -c "cat <<EOT > /etc/haproxy/haproxy.cfg
-global
-    log /dev/log local0
-    log /dev/log local1 notice
-    chroot /var/lib/haproxy
-    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
-    stats timeout 30s
-    user haproxy
-    group haproxy
-    daemon
-
-defaults
-    log global
-    mode http
-    option httplog
-    option dontlognull
-    timeout connect 5000
-    timeout client 50000
-    timeout server 50000
-
-frontend http_front
-    bind *:80
-    default_backend http_back
-
-backend http_back
-    balance roundrobin
+#!/usr/bin/env bash
+# Install and configure HAproxy on your lb-01 server so that it send traffic to web-01 and web-02
+sudo apt-get -y update
+sudo apt-get install -y haproxy
+sudo echo "ENABLED=1" >> /etc/default/haproxy
+# Listen to web1 and web2 servers
+sudo echo "
+   frontend www
+        bind *:80
+        default_backend back_server
+   backend back_server
+        balance      roundrobin
+        mode         http
     server 209879-web-01 52.201.222.41:80 check
     server 209879-web-02 174.129.54.185:80 check
-EOT"
-
-# Enable HAproxy init script
-sudo sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
-
-# Restart HAproxy service
+" >> /etc/haproxy/haproxy.cfg
+sudo haproxy -f /etc/haproxy/haproxy.cfg -c
 sudo service haproxy restart
