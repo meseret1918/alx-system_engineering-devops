@@ -10,7 +10,3 @@ if __name__ == '__main__':
         print("Please pass an argument for the subreddit to search.")
     else:
         print("{:d}".format(number_of_subscribers(sys.argv[1])))
-wintermancer@lapbox ~/reddit_api/project $ python3 0-main.py programming
-756024
-wintermancer@lapbox ~/reddit_api/project $ python3 0-main.py this_is_a_fake_subreddit
-0
