@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Find the Gunicorn master process ID (PID)
+MASTER_PID=$(ps auxf | grep '[g]unicorn' | awk '{print $2}' | head -n 1)
+
+if [ -z "$MASTER_PID" ]; then
+  echo "Gunicorn master process not found."
+  exit 1
+fi
+
+# Send the HUP signal to the master process to reload workers
+kill -HUP "$MASTER_PID"
+
+echo "Gunicorn workers are being gracefully reloaded."
+
